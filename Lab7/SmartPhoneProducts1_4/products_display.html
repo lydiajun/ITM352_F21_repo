@@ -1,0 +1,149 @@
+<html lang="en">
+<head>
+    <script>
+        var first_name = "Lydia";
+        var last_name= "Jun";
+    </script>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smartphone Products</title>
+    <link rel="stylesheet" href="products-style.css">
+</head>
+<body>
+    <header>
+        <p style="text-align: center; font-weight: bold;">
+            Hits:<span id="hits_span">0</span>
+            Spins:<span id="spins_span">0</span>
+            Hit/Spin:<span id="hit_spin_span">0</span>
+            You win:<span id="win_span">pending...</span>
+        </p>    
+        <h1><span style="font-size: 200%;">
+        <script> 
+            document.write(`<b>${first_name}</b> <i> ${last_name}</i>`);
+        </script>'s
+        </span>
+        <p>Used Smart Phone Store</h1></p>
+                    
+    </header>
+    <div><main>
+    <section class="item" onmouseover="this.className='item rotate'; spins_span.innerHTML = ++spins;
+    hit_spin_span.innerHTML = (hits/spins).toFixed(2);
+    over_half = over_half || (spins < 2*hits) && (hits < spins); win_span.innerHTML = over_half;" 
+    onclick="this.className='item'; hits_span.innerHTML = ++hits;
+    hit_spin_span.innerHTML = (hits/spins).toFixed(2);
+    win_span.innerHTML = (spins < 2*hits) && (hits < spins);">
+        <h2>HTC</h2>
+        <p>&dollar;40.00</p>
+        <img src="http://dport96.github.io/ITM352/morea/080.flow-control-II/HTC.jpg">
+    </section>
+    <section class="item" onmouseover="this.className='item rotate'; spins_span.innerHTML = ++spins;
+    hit_spin_span.innerHTML = (hits/spins).toFixed(2);
+    win_span.innerHTML = (spins < 2*hits) && (hits < spins);" 
+    onclick="this.className='item'; hits_span.innerHTML = ++hits;
+    hit_spin_span.innerHTML = (hits/spins).toFixed(2);
+    win_span.innerHTML = (spins < 2*hits) && (hits < spins);">
+        <h2>Apple</h2>
+        <p>&dollar;75.00</p>
+        <img src="http://dport96.github.io/ITM352/morea/080.flow-control-II/iphone-3gs.jpg">
+    </section>
+    <section class="item" onmouseover="this.className='item rotate'; spins_span.innerHTML = ++spins;
+    hit_spin_span.innerHTML = (hits/spins).toFixed(2);
+    win_span.innerHTML = (spins < 2*hits) && (hits < spins);" 
+    onclick="this.className='item'; hits_span.innerHTML = ++hits;
+    hit_spin_span.innerHTML = (hits/spins).toFixed(2);
+    win_span.innerHTML = (spins < 2*hits) && (hits < spins);">
+        <h2>Nokia</h2>
+        <p>&dollar;35.00</p>
+        <img src="http://dport96.github.io/ITM352/morea/080.flow-control-II/Nokia.jpg">
+    </section>
+    <section class="item" onmouseover="this.className='item rotate'; spins_span.innerHTML = ++spins;
+    hit_spin_span.innerHTML = (hits/spins).toFixed(2);
+    win_span.innerHTML = (spins < 2*hits) && (hits < spins);" 
+    onclick="this.className='item'; hits_span.innerHTML = ++hits;
+    hit_spin_span.innerHTML = (hits/spins).toFixed(2);
+    win_span.innerHTML = (spins < 2*hits) && (hits < spins);">
+        <h2>Samsung</h2>
+        <p>&dollar;45.00</p>
+        <img src="http://dport96.github.io/ITM352/morea/080.flow-control-II/Samsung.jpg">
+    </section>
+    <section class="item" onmouseover="this.className='item rotate'; spins_span.innerHTML = ++spins;
+    hit_spin_span.innerHTML = (hits/spins).toFixed(2);
+    win_span.innerHTML = (spins < 2*hits) && (hits < spins);" 
+    onclick="this.className='item'; hits_span.innerHTML = ++hits;
+    hit_spin_span.innerHTML = (hits/spins).toFixed(2);
+    win_span.innerHTML = (spins < 2*hits) && (hits < spins);">
+        <h2>Blackberry</h2>
+        <p>&dollar;10.00</p>
+        <img src="http://dport96.github.io/ITM352/morea/080.flow-control-II/Blackberry.jpg">
+    </section>
+</main></div>
+<h1>
+    Your One Stop Phone Shop - 
+    <script>
+        document.write(`${first_name} ${last_name}`);
+    </script>
+</h1>
+</body>
+
+<footer>
+<table border="1" style="margin-left: auto; margin-right: auto; text-align: center;">
+    <tbody><tr><th colspan="2"><h1>Your One Stop For Used Phones - 
+        <script>
+            var fi = first_name.substring(0,1);
+            document.write(fi);
+        </script>. 
+        <script>
+            var li = last_name.substring(0,1);
+            document.write(li);
+        </script>.'s
+        </h1></th></tr>
+    <tr><td>
+        <script>
+            line=1;
+            document.write(line);
+        </script>.
+    </td><td><br>Copyright @ 
+        <script>
+            document.write(`${first_name} ${last_name}`);
+        </script>
+    </td></tr>
+    <tr>
+    <td>
+        <script>document.write(line+1)</script>.
+    </td>
+    <td>
+        <p id="year"></p>
+        <script>
+            var now = new Date();
+            var yr = now.getFullYear();
+            document.getElementById("year").innerHTML = yr;
+        </script>
+    </td></tr>
+    <tr><td>
+        <script>document.write(line+2)</script>.
+    </td>
+    <td>
+        <script>
+            var hours = ((now.getHours()+11)%12+1);
+            var minutes = (now.getMinutes());
+            document.write(hours);      
+            document.write(":");
+            document.write(minutes);
+        </script>
+        <script>
+            document.write((hours < 12)?'AM':'PM');
+        </script>
+    </td></tr>
+    </tbody>
+</table>
+</footer>
+</html>
+
+<script>
+    var hits = 0;
+    var spins = 0;
+    hits_span.innerHTML = hits;
+    spins_span.innerHTML = spins;
+    var over_half = false;
+</script>

@@ -1,0 +1,20 @@
+<html lang="en">
+<head>
+    <script src="./products_data.js"></script>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <table border="1">
+        <tbody><tr><th>Number</th><th>Item</th></tr> 
+            <script>
+                var num_products = 5;
+                for (i = 1; i <= num_products; i++) {
+                document.write(`<tr><td>${i}</td><td>${eval('name' + i)}</td></tr>`);
+                }
+            </script>
+    </tbody></table>
+</body>
+</html>

@@ -4,35 +4,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script>
-    /* This is the html file
-    for the Invoice1 WOD. */
-
-    // Product Data
-    // Product 1
-    var item1 = 'Pencil';
-    var quantity1 = 3;
-    var price1 = 0.99;
-
-    // Product 2
-    var item2 = 'Pen';
-    var quantity2 = 2;
-    var price2 = 1.29;
-
-    // Product 3
-    var item3 = 'Eraser';
-    var quantity3 = 1;
-    var price3 = 0.75;
-
-    // Product 4
-    var item4 = 'Folder';
-    var quantity4 = 3;
-    var price4 = 1.65;
-
-    // Product 5
-    var item5 = 'Notebook';
-    var quantity5 = 5;
-    var price5 = 1.99;
+    <script src="products_data.js">
     </script>
 </head>
 <body>
@@ -47,19 +19,44 @@
             </tr>
 
 <script>
-subtotal = 0
-for (i=1; eval("typeof item"+i) != 'undefined'; i++) {
-  extended_price = eval('price' + i) * eval('quantity' + i)
-  subtotal += extended_price
+var quantities = [1, 'cat', 3.5, -4, 0];
+
+function generate_item_rows(product_quantities_array) {
+  for (i in products) {
+    if (product_quantities_array[i] == 0) continue;
+    errors = isNonNegInt(product_quantities_array[i], true)
+    if (errors.length == 0) {
+  extended_price = products[i].price * product_quantities_array[i];
+  subtotal += extended_price;
+    } else {
+      extended_price = "";
+    }
   document.write(`
     <tr>
-      <td width="43%">${eval('item' + i)}</td>
-      <td align="center" width="11%">${eval('quantity' + i)}</td>
-      <td width="13%">$${eval('price' + i)}</td>
-      <td width="54%">$${eval(extended_price.toFixed(2))}</td>
+      <td width="43%">${products[i].name}</td>
+      <td align="center" width="11%">${product_quantities_array[i]}<br><font color="red">${errors.join('<br>')}</font></td>
+      <td width="13%">$${products[i].price}</td>
+      <td width="54%">$${extended_price}</td>
     </tr>
   `)
 }
+}
+
+function isNonNegInt(q, returnErrors = false){
+    // Checks if a string q is a non-neg integer. If returnErrors is true, the array of errors is returned.
+    // Otherwise returns true if q is non-neg int.
+    errors = []; // assume no errors at first
+    if(q == '') q=0;
+    if(Number(q) != q) errors.push('Not a number!'); // Check if string is a number value
+    if(q < 0) errors.push('Negative value!'); // Check if it is non-negative
+    if(parseInt(q) != q) errors.push('Not an integer!'); // Check that it is an integer
+
+    return returnErrors ? errors : (errors.length == 0);
+}
+
+subtotal = 0;
+generate_item_rows(quantities);
+
 
 //Compute sales tax
 var salestax = subtotal * 0.0575

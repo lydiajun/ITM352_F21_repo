@@ -4,11 +4,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <script>
+        let params = (new URL(document.location)).searchParams; 
+    </script>
 </head>
 <body> 
-    Thank you for buying <span id="qty_span"></span> things!
+    Thank you for ordering <span id="qty_span"></span> things!
     <script>
-    let params = (new URL(document.location)).searchParams;
         if (params.has("quantity_textbox") && params.get("quantity_textbox") > 0) {
         qty_span.innerHTML = params.get('quantity_textbox');
         } else {

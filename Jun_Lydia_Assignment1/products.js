@@ -1,4 +1,4 @@
-// Master products SNEAKERS
+// Master products
 [
     // Product 1
     {

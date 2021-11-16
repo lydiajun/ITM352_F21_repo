@@ -1,0 +1,84 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./product_data.js"></script>
+</head>
+
+<body>
+    <script>
+        let params = (new URL(document.location)).searchParams;
+        var q = params.get('quantity');
+
+        let brand = products[0]['brand'];
+        let brand_price = products[0]['price'];
+
+        function isNonNegInt(q, returnErrors = false) {
+        // Checks if a string q is a non-neg integer. If returnErrors is true, the array of errors is returned.
+        // Otherwise returns true if q is non-neg int.
+            errors = []; // assume no errors at first
+            if (q == '') q = 0;
+            if (Number(q) != q) errors.push('Not a number!'); // Check if string is a number value
+            else {
+                if (q < 0) errors.push('Negative value!'); // Check if it is non-negative
+                if (parseInt(q) != q) errors.push('Not an integer!'); // Check that it is an integer
+                }
+
+            return returnErrors ? errors : (errors.length == 0);
+        }
+
+        if (params.has('error')) {
+            document.write(`Error: ${q} is not a quantity. Hit the back button to fix.`);
+        }
+        else if (params.has('quantity')) {
+            if (isNonNegInt(q)) {
+                // products[0].total_sold += Number(q);
+                document.write(`<h2>Thank you for purchasing ${q} ${brand}. Your total is \$${q * brand_price}!</h2>`);
+            } 
+            window.stop;
+        }
+
+        for (i in products) {
+            document.write(`<h4>${products[i]["total_sold"]} ${products[i]["brand"]} have been sold!</h4>`);
+        }
+
+        document.write(`<h3>${products[0]["brand"]} at \$${products[0]["price"]}</h3>`);
+    </script>
+    <form name="quantity_form" action="./process_form" method="POST">
+    <label>quantity desired:</label>
+    <input name="quantity_textbox" type="text" onkeyup="checkQuantityTextbox(this);">
+    <span id='qty_textbox_message'>Enter a quantity</span>
+    <br>
+    <input type="submit" value="Purchase">
+</form>
+</body>
+
+</html>
+<script>
+    function checkQuantityTextbox(theTextbox) {
+        // is the textbox value a non-neg int?
+        var errors_array = isNonNegInt(theTextbox.value, true);
+        qty_textbox_message.innerHTML = errors_array.join(' ');
+    }
+
+    function displayPurchase() {
+        var qty = quantity_textbox.value;
+        var err = isNonNegInt(qty, true);
+        if (err.length == 0) {
+            document.write(`Thank for you for ordering ${qty} things!`);
+        } else {
+            qty_textbox_message.innerHTML = `<font color="red">${err.join(' ')} Enter a valid quantity.</font>`;
+        }
+    }
+
+    if (params.has('quantity_textbox')) {
+        quantity_form["quantity_textbox"].value = params.get('quantity_textbox');
+        checkQuantityTextbox(quantity_form["quantity_textbox"]);
+        if (params.get('quantity_textbox') > 0) {
+            document.write(`Thank you for ordering ${params.get('quantity_textbox')} things!`);
+        }
+      }
+</script>

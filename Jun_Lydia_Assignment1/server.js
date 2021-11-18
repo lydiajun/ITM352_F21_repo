@@ -52,13 +52,13 @@ app.post("/process_form", function (req, res, next) {
         qua = POST['quantity' + i];
         // Error alert if invalid quantities inputted into textboxes.
         if (isNonNegInt(qua) == false) {
-            errors['quantity' + i] = `Please enter valid quantities for ${products[i].name}`;
+            errors['quantity' + i] = `Please enter valid quantities for ${products[i].model}`;
         }
         if (qua > 0) {
             delete errors['no_quantities']; // Delete errors if valid quantities.
             // Validate quantities by checking available amount in inventories.
             if (qua > products[i].inventory) { // Error alert if quantity submitted is more than available in inventories.
-                errors['inventory' + i] = `${qua} of ${products[i].name} not available. Only ${products[i].inventory} available.`;
+                errors['inventory' + i] = `${qua} of ${products[i].model} not available. Only ${products[i].inventory} available.`;
             }
         }
     }

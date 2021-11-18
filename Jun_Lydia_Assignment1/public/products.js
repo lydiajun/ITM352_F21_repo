@@ -9,7 +9,7 @@ var products =
     {
         "model":"Nike Air Force 1 '07",
         "price":90.00,
-        "image":"./images/af1.jpeg",
+        "image":"./images/af1.JPEG",
         "inventory":10
     },
     {

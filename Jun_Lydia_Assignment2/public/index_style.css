@@ -1,0 +1,31 @@
+/* CSS file for the style of index.html */
+
+/* Image courtesy of Luxe Digital */
+body {
+  text-align: center;
+  letter-spacing: 5px;
+  font-size: 40px;
+  font-family: 'roboto mono', sans;
+  size: 8000px;
+  color: white;
+  padding: 275px;
+  vertical-align: center;
+  background-image: url("./images/index.jpeg");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Button styling */
+button {
+  font-family: 'roboto mono', sans;
+  color: white;
+  background-color: black;
+  border-radius: 25px;
+  padding: 5px;
+  box-shadow: 3px 3px gray;
+}
+
+button:hover {
+  color: black;
+  background-color: white;  
+}

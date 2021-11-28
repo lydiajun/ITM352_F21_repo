@@ -1,0 +1,72 @@
+/* Store name */
+#shooz {
+    font-family: 'roboto mono', sans;
+    letter-spacing: 5px;
+    padding: 5px;
+    margin-bottom: 60px;
+    text-align: center;
+}
+
+a:link {
+    text-decoration: none;
+    color: black;
+}
+  
+a:visited {
+    text-decoration: none;
+    color: black;
+}
+  
+a:hover {
+    text-decoration: none;
+    color: white;
+}
+  
+a:active {
+    text-decoration: none;
+    color: black;
+}
+
+/* Create an account hover */
+.create a:hover {
+    font-weight: bold;
+    color: black;
+}
+
+/* Body styling */
+body {
+    text-align: center;
+    font-family: 'roboto mono', sans;
+    background-image: url('./images/neutral.jpeg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 130%;
+}
+
+/* Sign In button */
+#signin {
+    font-family: 'roboto mono', sans;
+    font-size: 20px;
+    color: white;
+    background-color: black;
+    border-radius: 25px;
+    padding: 5px;
+    box-shadow: 3px 3px gray;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#signin:hover {
+    color: black;
+    background-color: white;  
+  }
+
+/* Box around Sign In*/
+.box {
+    margin-top: 20px;
+    border: 1px solid black;
+    width: 450px;
+    background: white;
+    margin-left: auto;
+    margin-right: auto;
+}

@@ -53,12 +53,12 @@ Customers can input quantities of the itmes they want here.
                 }
                 // Alert message if there are any errors in params.
                 if (params.has('error')) {
-                    var errors = JSON.parse(params.get('error'));
+                    var errors = JSON.parse(params.get('error')); // parse errors
                     let error_str = '';
                     for (err in errors) {
-                        error_str += errors[err] + '\n';
+                        error_str += errors[err] + '\n'; // add errors together
                     }
-                    alert(error_str);
+                    alert(error_str); // then put all errors into alert
                 }
 
             }
@@ -71,7 +71,7 @@ Customers can input quantities of the itmes they want here.
     <form name="quantity_form" action="/process_form" method="POST">
         <div><main>
             <script>
-                // Loop that runs through products.js, taken from SPP3.
+                // Loop that runs through products.js and prints on page, taken from SPP3.
                 var i;
                 for (i=0; i < products.length; i++) {
                     document.write(`
@@ -81,7 +81,7 @@ Customers can input quantities of the itmes they want here.
                             <p> </p>
                             <p>&dollar;${products[i].price}</p>
                             <label id="quantity${i}_label"}">${products[i].inventory} in stock</label>
-                            <p><input type="text" name="quantity${i}" onkeyup="checkQuantityTextbox(this);"></p>
+                            <p><input type="text" id="qbox" name="quantity${i}" onkeyup="checkQuantityTextbox(this);"></p>
                         </section>
                     `);
                 };

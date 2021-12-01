@@ -50,6 +50,10 @@ main {
     justify-content: space-around;
 }
 
+#qbox {
+    width: 200px;
+}
+
 /* Product listing size */
 .item {
     width: 200px;

@@ -17,8 +17,8 @@ If the information entered matches the file, the log in is successful and they a
     let params = (new URL(document.location)).searchParams; // Gets form submission data inside params.
     window.onload = function () {
         if (params.has('LoginError')) {
+            alert(params.get('LoginError')); // shows error with sign in
             // Sticky textboxes for invalid data.
-            alert(params.get('LoginError'));
         } if (params.has('username')) {
             username.value = params.get('username')
         }

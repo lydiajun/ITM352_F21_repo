@@ -13,19 +13,19 @@ The registration only goes through (and redirects to invoice) if there are no er
     <link rel="stylesheet" href="signup_style.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono|Open+Sans">
     <script>
-    //try to get the register errors and if the user enter bad information,give a alert, then put the bad information back and let them change it
+    // If there are any errors in the sign up, the information will stay inside the textboxes so the customer can change it.
     let params = (new URL(document.location)).searchParams;
     window.onload = function () {
       if (params.has('reg_errors')) {
-        var errors = JSON.parse(params.get('reg_errors'));
-        // make register form sticky
+        var errors = JSON.parse(params.get('reg_errors')); // parse the errors. errors will show in red under each section
+        // Sticky textboxes.
         for (i = 0; i < register.elements.length; i++) {
           register[i].value = params.get(register[i].name);
           if (typeof errors[register[i].name] != 'undefined') {
             document.getElementById(register[i].name + '_error').innerHTML = errors[register[i].name];
           }
         }
-        alert('Please fix the following errors!');
+        alert('Please fix the following errors!'); // alert message to fix errors
       }
     }
     </script>

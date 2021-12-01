@@ -39,9 +39,8 @@ show an error message printed at the top with an empty invoice.
 <body>
     <a href="store.html"><div id="shooz"><h1>shooz</h1></div></a>
     <script>
-    // show the username to make sure they login the correct account
+    // If there is a successful sign in or sign up, the invoice will print their name in the thank you message
     if (username != 'undefined' && username != '') {
-        //if the username is correct, then show this
         document.write(`<h2>Thank you for shopping with us, ${username}!<h2>`);
     } else {
         document.write(``);

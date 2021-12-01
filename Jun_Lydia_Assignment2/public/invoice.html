@@ -1,3 +1,9 @@
+<!--
+This is the invoice page. Accessing this page (with quantities entered) is ONLY succesful IF (1) login is successful or 
+(2) registration is successful. If there is attempted access to this page without login or registration, the page will
+show an error message printed at the top with an empty invoice.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +16,12 @@
     <script src="./products.js" type="text/javascript"></script>
     <script>
         let params = (new URL(document.location)).searchParams;
+        if (params.has('username')) {
+            var username = params.get('username');
+        } else {
+            window.location.href = "./login.html";
+        }
+
         var quantities = [];
         // Invoice generation based on product quantities in querystring.
         if (params.has('purchase_submit')) {
@@ -21,15 +33,20 @@
             }
         } else { // Error message on top if invoice.html is accessed without form submission.
             document.write('ERROR: No form submitted.');
-
         }
     </script>
 </head>
 <body>
     <a href="store.html"><div id="shooz"><h1>shooz</h1></div></a>
-    <h2>Thank you for shopping with us, <script>
-        
-    </script>!</h2>
+    <script>
+    // show the username to make sure they login the correct account
+    if (username != 'undefined' && username != '') {
+        //if the username is correct, then show this
+        document.write(`<h2>Thank you for shopping with us, ${username}!<h2>`);
+    } else {
+        document.write(``);
+    }   
+    </script></h2>
     
     <div class="thetable">
         <table border="2">

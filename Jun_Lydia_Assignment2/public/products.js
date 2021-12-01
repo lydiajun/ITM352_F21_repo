@@ -1,3 +1,6 @@
+// This is the javascript file that contains the JSON object for the variable called products. All product information,
+// including the model, price, image location, and inventory is contained in this file.
+
 var products = 
 [
     {
@@ -13,13 +16,7 @@ var products =
         "inventory":10
     },
     {
-        "model":"Vans Sk8 Hi",
-        "price":70.00,
-        "image":"./images/vans.jpg",
-        "inventory":10
-    },
-    {
-        "model":"Reebok Club C 85",
+        "model":"Reebok Club C 85 Vintage",
         "price":70.00,
         "image":"./images/reebok.jpg",
         "inventory":10
@@ -29,9 +26,16 @@ var products =
         "price":100.00,
         "image":"./images/blazer.jpg",
         "inventory":10
+    },
+    {
+        "model":"Adidas Originals Ozweego",
+        "price":120.00,
+        "image":"./images/ozweego.jpg",
+        "inventory":10
     }
 ];
 
-if(typeof exports != 'undefined') { // Export products to server.js.
+// Export products to server.js.
+if(typeof exports != 'undefined') { 
     exports.products = products;
 }

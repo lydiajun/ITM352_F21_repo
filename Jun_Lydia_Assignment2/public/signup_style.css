@@ -44,7 +44,7 @@ body {
 }
 
 /* Sign Up button */
-#signup {
+#registerbtn {
     font-family: 'roboto mono', sans;
     font-size: 20px;
     color: white;
@@ -56,7 +56,7 @@ body {
     margin-right: auto;
 }
 
-#signup:hover {
+#registerbtn:hover {
     color: black;
     background-color: white;  
   }
@@ -65,7 +65,7 @@ body {
 .box {
     margin-top: 20px;
     border: 1px solid black;
-    width: 450px;
+    width: 500px;
     background: white;
     margin-left: auto;
     margin-right: auto;

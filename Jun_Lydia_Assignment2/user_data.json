@@ -1,17 +1,22 @@
 {
     "dport": {
-        "name": "Dan Port", 
-        "password": "portspassword", 
-        "email": "dport@hawaii.edu"
-    },
-    "kazman": {
-        "name": "Rick Kazman", 
-        "password": "kazmanpassword", 
-        "email": "kazman@hawaii.edu"
+        "email": "dport@hawaii.edu",
+        "name": "Dan Port",
+        "password": "portspassword"
     },
     "itm352": {
-        "name": "ITM 352", 
-        "password": "grader", 
-        "email": "itm352@hawaii.edu"
+        "email": "itm352@hawaii.edu",
+        "name": "ITM 352",
+        "password": "grader"
+    },
+    "lydiajun": {
+        "name": "Lydia Jun",
+        "password": "password",
+        "email": "lydiajun@hawaii.edu"
+    },
+    "lydiasjun": {
+        "name": "Lydia Jun",
+        "password": "passcode",
+        "email": "lydias.jun@gmail.com"
     }
 }

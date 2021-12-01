@@ -1,32 +1,40 @@
+// This is the server.js file that runs the server for my store and contains instructions for specific requests.
+
+// DEFINING VARIABLES
+
+// from Lab 13, to use express modules
 var express = require('express');
 var app = express();
 var myParser = require("body-parser");
 
+// requires user_data.json file for user information, taken from Lab 14
+var fs = require('fs');
+var filename = './user_data.json';
+
+// requires products.js file for product information
 var data = require('./public/products.js');
 var products = data.products;
 
+// sets product inventory to 10
 products.forEach((prod, i) => { prod.inventory = 10; });
 var querystring = require("querystring");
 
-var users_reg_data = 
-{
-    "dport": {"password":"portpass"},
-    "kazman": {"password":"kazpass"},
-    "itm352": {"password":"grader"}
-};
+// used to later store quantity data from products disiplay page. assume empty at first
+var temp_qty_data = {};
 
-// Routing 
+
+// ROUTING
 
 // Monitor all requests
 app.all('*', function (request, response, next) {
-    console.log(request.method + ' to ' + request.path);
+    console.log(request.method + ' to ' + request.path); // console shows request to path
     next();
 });
 
 // GET request for products.js.
 app.get('/products.js', function (request, response, next) {
     response.type('.js');
-    var products_str = `var products = ${JSON.stringify(products)};`;
+    var products_str = `var products = ${JSON.stringify(products)};`; // puts products into JSON object
     response.send(products_str);
 });
 
@@ -43,13 +51,115 @@ function isNonNegInt(q, return_errors = false) {
 }
 
 // Adopted from Lab 13 Exercise 3.
-app.use(myParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
+// Checks for the existence of the file, from Lab 14
+if (fs.existsSync(filename)) { 
+    var data = fs.readFileSync(filename, 'utf-8'); // if it exists, read the file user_data.json storedin filename
+    var user_data = JSON.parse(data); // parse user data
+  } 
+
+// POST request from signin.html. Adopted from Assignment 2 code examples on ITM 352 website, and received help from Professor Port
+app.post("/process_login", function (req, res) {
+    var the_username = req.body.username.toLowerCase();
+    if (typeof user_data[the_username] != 'undefined') {
+        if (user_data[the_username].password == req.body.password) { // Check if password matches username.
+            // if there are no errors, store user info in temp_qty_data and send to invoice.  
+            temp_qty_data['username'] = the_username;
+            temp_qty_data['email'] = user_data[the_username].email;       
+            let params = new URLSearchParams(temp_qty_data);
+            res.redirect('/invoice.html?' + params.toString()); // Send to invoice page if login successful.
+            return; // end process
+        } else { // else (the_username password does not match the password entered), then there's an error
+            req.query.username = the_username;
+            req.query.LoginError = 'Invalid password!'; // Error message for wrong password.
+        }
+    } else { // else (the _username is undefined), there's an error
+        req.query.LoginError  = 'Invalid username!'; // Error message for user that doesn't exist.
+    } 
+    // otherwise back to login with errors.    
+    params = new URLSearchParams(req.query);
+    res.redirect("./signin.html?" + params.toString()); // Redirect to signin.html if errors.
+});
+
+// POST request from signup.html. Received help from Professor Port
+// Registration validation (each validation adopted from https://www.w3resource.com/javascript/form/javascript-sample-registration-form-validation.php)
+app.post("/process_register", function (req, res) {
+    var reg_errors = {};  // assume no errors at start
+    var reg_username = req.body.username.toLowerCase();
+
+    // EMAIL VALIDATION
+    if (/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(req.body.email)) { //check if the fullname is correct
+    } else {
+        reg_errors['email'] = "Invalid email."; // error message for email that doesn't match format of name@website.domain
+    } 
+
+    // NAME VALIDATION
+    if (/^[A-Za-z, ]+$/.test(req.body.fullname)) { // name must contain only letters
+    } else {
+        reg_errors['fullname'] = "Enter a name with alphabet characters only."; // error message if name contains numbers or invalid characters/symbols
+    }
+    
+    if (req.body.fullname.length > 30 && req.body.fullname.length < 1) { // 30 characters or less
+        reg_errors['fullname'] = "Name must be less than 30 characters."; // error message if name exceeds 30 characters or nothing in there
+    }
+
+    // USERNAME VALIDATION
+    // alphanumeric check taken from https://stackoverflow.com/questions/4434076/best-way-to-alphanumeric-check-in-javascript
+    if (/^[0-9a-z]+$/.test(req.body.username)) { // Letters and numbers only
+    } else {
+        reg_errors['username'] = "Enter a username with alphanumeric characters only.";  // error message if username contains invalid characeters/symbols
+    }
+
+    if (req.body.username.length > 10 || req.body.username.length < 4) { // 4-10 characters
+        reg_errors['username'] = "Username must be 4-10 characters."; // error message if username is under 4 characters or over 10 characters
+    }
+    
+    if (typeof user_data[reg_username] != 'undefined') { // Username must be unique
+        reg_errors['username'] = 'This username is already taken!'; // error message if username is already in user_data.json file
+    }
+
+    // PASSWORD VALIDATION
+    if (req.body.password.length < 6) {
+        reg_errors['password'] = "Password must be more than 6 characters."; // error message if password doesn't exceed 6 characters
+    }
+
+    // CONFIRM PASSWORD VALIDATION
+    if (req.body.password !== req.body.confirmpassword) {
+        reg_errors['confirmpassword'] = "Passwords do not match." // error message if passwords don't match
+    }
+
+    // Save registration data to json file and send to invoice page if registration successful. 
+    // Taken from Lab 14 Exercise 4.
+    if (Object.keys(reg_errors).length == 0) {
+        var username = req.body['username'].toLowerCase();
+        user_data[username] = {};
+        // information entered is added to user_data
+        user_data[username]['name'] = req.body['fullname']; 
+        user_data[username]['password'] = req.body['password'];
+        user_data[username]['email'] = req.body['email'];
+
+        // stored data of purchase info goes into temp_qty_data
+        fs.writeFileSync(filename, JSON.stringify(user_data), "utf-8");
+        // username and email from temp_qty_data variable added into file as username and email
+        temp_qty_data['username'] = username;
+        temp_qty_data['email'] = user_data[username]["email"];
+        let params = new URLSearchParams(temp_qty_data);
+        res.redirect('./invoice.html?' + params.toString()); // go to invoice at the end of a successful registration process
+    }
+
+    // Otherwise back to registration with the registration errors.    
+    else {
+        req.body['reg_errors'] = JSON.stringify(reg_errors);
+        let params = new URLSearchParams(req.body);
+        res.redirect('signup.html?' + params.toString()); // redirect to signup page after errors popup
+      }
+});
 
 // Process purchase request (validate quantities, check quantity available)
-// Adopted from Lab 13 Exercise 3.
-app.post("/process_form", function (req, res, next) {
+// Adopted from Lab 13 Exercise 3. (this has remained the same since Assignment 1)
+app.post("/process_form", function (request, response, next) {
     // Post request routing.
-    let POST = req.body;
+    let POST = request.body;
 
     // Error alert if form submission has no quantities.
     var errors = {};
@@ -75,43 +185,16 @@ app.post("/process_form", function (req, res, next) {
     if (JSON.stringify(errors) === '{}') {
         // Remove quantity for amount of products i purchased.
         for (i = 0; i < products.length; i++) {
-            products[i].inventory -= Number(POST['quantity' + i]); 
+            products[i].inventory -= Number(POST['quantity' + i]);
         }
         // Redirect customer to signin.html if valid quantities entered.
-        res.redirect("./signin.html?" + QString);
+        temp_qty_data = request.body;
+        response.redirect("./signin.html?" + `    `);
     } else { // Else, give the errors.
         let errObj = { 'error': JSON.stringify(errors) };
         QString += '&' + querystring.stringify(errObj);
-        res.redirect("./store.html?" + QString); // Redirect to store.html if errors.
+        response.redirect("./store.html?" + QString); // Redirect to store.html if errors.
     }
-});
-
-// POST request to signin.html. Taken from Assignment 2 code examples on ITM 352 website.
-app.post("/signin.html", function (request, response) {
-    let params = new URLSearchParams(request.query);
-    // Process login form POST and redirect to logged in page if ok, back to login page if not.
-    the_username = request.body['username'].toLowerCase();
-    the_password = request.body['password'];
-    if (typeof users_reg_data[the_username] != 'undefined') { 
-        if (users_reg_data[the_username].password == the_password) { // Check if password matches username.
-            response.redirect('./invoice.html?'+ params.toString()); // Send to invoice page if login successful.
-        } else {
-            response.send(`Wrong password!`); // Error message for wrong password.
-        }
-        return;
-    }
-    response.send(`${the_username} does not exist`); // Error message for user that doesn't exist.
-});
-
-// POST request to signup.html.
-app.post("/signup.html", function (request, response) {
-    // Registration validation
-        // Check if email address is valid. Case insensitive.
-        // Name should only allow letters. 30 characters or less.
-        // Check if username is unique. Letters and numbers only. 4-10 characters. Case insensitive.
-        // Password is 6 characters min. Case sensitive.
-        // Check if "Confirm Password" is same as password.
-    // Send to invoice page if registration successful.
 });
 
 // Route all other GET requests to files in public.

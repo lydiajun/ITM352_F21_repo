@@ -1,0 +1,116 @@
+<!--
+This is the invoice page. Accessing this page (with quantities entered) is ONLY succesful IF (1) login is successful or 
+(2) registration is successful. If there is attempted access to this page without login or registration, the page will
+show an error message printed at the top with an empty invoice.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Order</title>
+    <link rel="stylesheet" href="invoice_style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono|Open+Sans">
+    <script src="./products.js" type="text/javascript"></script>
+    <script>
+        let params = (new URL(document.location)).searchParams;
+        if (params.has('username')) {
+            var username = params.get('username');
+        } else {
+            window.location.href = "./login.html";
+        }
+
+        var quantities = [];
+        // Invoice generation based on product quantities in querystring.
+        if (params.has('purchase_submit')) {
+            for (i = 0; i < products.length; i++) {
+                if (params.has(`quantity${i}`)) {
+                    a_qty = params.get(`quantity${i}`);
+                    quantities[i] = a_qty;
+                }
+            }
+        } else { // Error message on top if invoice.html is accessed without form submission.
+            document.write('ERROR: No form submitted.');
+        }
+    </script>
+</head>
+
+<body>
+<a href="store.html"><div id="hs"><h1>HEAVEN SCENT</h1></div></a>
+<script>
+// If there is a successful sign in or sign up, the invoice will print their name in the thank you message
+if (username != 'undefined' && username != '') {
+    document.write(`<h2>Thank you for shopping with us, ${username}!</h2>`);
+} else {
+    document.write(``);
+}   
+</script>
+
+<div class="thetable"><table border="2"><tbody>
+
+<script>
+    // Taken from Invoice4 WOD.
+    subtotal = 0;
+    for (i = 0; i < products.length; i++) {
+        if (quantities[i] > 0) {
+            extended_price = quantities[i] * products[i].price;
+            subtotal += extended_price;
+
+            document.write(`
+                <tr>
+                <td width="50%"><img src="${products[i].image}"></td>
+                <td width="50">
+                    <strong>${products[i].model}</strong>
+                    <p>Quantity: ${quantities[i]}</p>
+                    <p>Price: $${products[i].price}</p>
+                    <p>Extended Price: $${extended_price}</p>
+                </td>
+                </tr>
+            `)
+        }
+    }
+
+    // Compute sales tax.
+    var salestax = subtotal * 0.04
+
+    // Compute shipping based on shipping policy below.
+    var shipping
+    if (subtotal <= 74.99) {
+    shipping = 10;
+    } else if (75 < subtotal <= 149.99) {
+    shipping = 5;
+    } if (subtotal > 150) {
+    shipping = 0
+    }
+
+    // Compute grand total.
+    var grandtotal = subtotal + salestax + shipping
+
+    // function for alert that shows shipping rates info
+    function shippingalert() {
+        alert(`
+            SHIPPING RATES:
+            Under US $74.99: $10
+            Between US $75-$149.99: $5
+            US $150 or more: Free shipping
+        `)
+    }
+
+</script>  
+</tbody></table>
+</div>    
+
+<div class="ordersummary">
+    <H3>ORDER SUMMARY:</H3>
+    <p>Sub-total: $<script>document.write(subtotal.toFixed(2))</script></p>
+    <p>Tax (4.00%): $<script>document.write(salestax.toFixed(2))</script></p>
+    <p><span onclick="shippingalert()"><u>Shipping</u></span>: $<script>document.write(shipping.toFixed(2))</script>
+    </p>
+    <p><strong>Total: $<script>document.write(grandtotal.toFixed(2))</script></strong></p>
+</div>
+
+    
+</body>
+</html>

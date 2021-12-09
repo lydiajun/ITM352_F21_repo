@@ -1,0 +1,22 @@
+{
+    "dport": {
+        "email": "dport@hawaii.edu",
+        "name": "Dan Port",
+        "password": "portspassword"
+    },
+    "itm352": {
+        "email": "itm352@hawaii.edu",
+        "name": "ITM 352",
+        "password": "grader"
+    },
+    "lydiajun": {
+        "name": "Lydia Jun",
+        "password": "password",
+        "email": "lydiajun@hawaii.edu"
+    },
+    "lydiasjun": {
+        "name": "Lydia Jun",
+        "password": "passcode",
+        "email": "lydias.jun@gmail.com"
+    }
+}

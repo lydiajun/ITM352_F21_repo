@@ -1,0 +1,111 @@
+<!--
+This is the html file that makes up the store or products display page. 
+Customers can input quantities of the itmes they want here.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEAVEN SCENT</title>
+    <link rel="stylesheet" href="store_style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono|Open+Sans">
+    <script src="products.js" type="text/javascript"></script>
+    <script>
+        // Function adopted from previous labs, like Lab 13.
+        // Checks if a string q is a non-neg integer. If returnErrors is true, the array of errors is returned.
+        // Otherwise returns true if q is non-neg int.
+        function isNonNegInt(q, return_errors = false) {
+            errors = []; // Assume no errors at first.
+            if (q == '') q = 0; // Blank quantities = 0.
+            if (Number(q) != q) errors.push('<font color="red">Not a number!</font>'); // Check if string is a number value.
+            else if (q == 0) errors.push('<font color="red">Quantity cannot be zero!</font>'); // Error message for off-nominal case: if submit clicked but 0 quantity.
+            else if (q > 10) errors.push('<font color="red">Only 10 in stock</font>'); // Error message if higher quantity than stock.
+            else if (q < 0) errors.push('<font color="red">Negative value!</font>'); // Check if it is non-negative.
+            else if (parseInt(q) != q) errors.push('<font color="red">Not an integer!</font>'); // Check that it is an integer.
+            return return_errors ? errors : (errors.length == 0);
+        }
+
+        // Function adopted from previous labs.
+        // Used onkeyup from store.html in each textbox.
+        function checkQuantityTextbox(theTextbox) {
+            errs = isNonNegInt(theTextbox.value, true); // Uses isNonNegInt to find errors in quantities entered in textboxes.
+            if (errs.length == 0) errs = ['Add to order:']; // Stock amount changes to "Add to order" onkeyup.
+            if (theTextbox.value.trim() == '') errs = ['Quantity:']; // Stock amount changes to "Quantity:" after erasing textbox.
+            document.getElementById(theTextbox.name + '_label').innerHTML = errs.join(", "); // Show errors from isNonNegInt function.
+        }
+
+        // Function that deals with reloading or redirecting page.
+        window.onload = function () {
+            let params = (new URL(document.location)).searchParams; // Gets form submission data inside params.
+            // Next steps when form is submitted. 
+            // If no errors -> invoice.html.
+            if (params.has('purchase_submit')) {
+                for (i = 0; i < products.length; i++) {
+                    if (params.has(`quantity${i}`)) {
+                        a_qty = params.get(`quantity${i}`);
+                        // Sticky textboxes for invalid data.
+                        quantity_form[`quantity${i}`].value = a_qty;
+                        checkQuantityTextbox(quantity_form[`quantity${i}`]);
+                    }
+                }
+                // Alert message if there are any errors in params.
+                if (params.has('error')) {
+                    var errors = JSON.parse(params.get('error')); // parse errors
+                    let error_str = '';
+                    for (err in errors) {
+                        error_str += errors[err] + '\n'; // add errors together
+                    }
+                    alert(error_str); // then put all errors into alert
+                }
+
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="icon"><a href="shoppingcart.html"><img src="./images/clipart.png"></a></div>
+    <a href="index.html"><div id="hs"><h1>HEAVEN SCENT</h1></div></a>
+
+    <div>
+        <ul>
+            <a href="chanel.html"><li>Chanel</li></a>
+            <a href="dior.html"><li>Dior</li></a>
+            <a href="gucci.html"><li>Gucci</li></a>
+            <a href="ysl.html"><li>Yves Saint Laurent</li></a>
+            <a href="signin.html"><li>Sign In</li></a>
+        </ul>
+    </div>
+
+    <form name="quantity_form" action="/process_form" method="POST">
+        <div><main>
+            <script>
+                // Loop that runs through products.js and prints on page, taken from SPP3.
+                var i;
+                for (i=0; i < products.length; i++) {
+                    document.write(`
+                        <section class="item">
+                            <img src="${products[i].image}">
+                            <h3>${products[i].model}</h3>
+                            <p> </p>
+                            <p>&dollar;${products[i].price}</p>
+                            <label id="quantity${i}_label"}">${products[i].inventory} in stock</label>
+                            <p><input type="text" id="qbox" name="quantity${i}" onkeyup="checkQuantityTextbox(this);"></p>
+                        </section>
+                    `);
+                };
+            </script>
+        </main></div>
+
+    <div class="container">
+        <div class="center">
+            <br><input type="submit" class="button" value="Purchase" id="submit" name="purchase_submit">
+        </div>
+    </div>
+
+    </form>
+    
+</body>
+</html>

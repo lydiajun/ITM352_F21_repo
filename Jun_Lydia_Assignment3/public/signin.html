@@ -1,0 +1,50 @@
+<!--
+This is the sign in page for users who already have an account (which is indicated by whether their info is in user_data.json)
+If the information entered matches the file, the log in is successful and they are redirected to the invoice page.
+-->
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <link rel="stylesheet" href="signin_style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono|Open+Sans">
+    <script src="/Jun_Lydia_Assignment2/user_data.json" type="json"></script>
+    <script>            
+    let params = (new URL(document.location)).searchParams; // Gets form submission data inside params.
+    window.onload = function () {
+        if (params.has('LoginError')) {
+            alert(params.get('LoginError')); // shows error with sign in
+            // Sticky textboxes for invalid data.
+        } if (params.has('username')) {
+            username.value = params.get('username')
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <a href="store.html">
+        <div id="hs">
+            <h1>HEAVEN SCENT</h1>
+        </div>
+    </a>
+
+    <div class="box">
+        <h2>Sign In</h2>
+        New to HEAVEN SCENT? <div class="create"><a href="signup.html"><u>Create an account.</u></a></div>
+
+        <form action="/process_login" method="POST" name="login_form">
+            <p><b>Username</b></p>
+            <p><input type="text" name="username" id="username" size="40" onchange='this.value=this.value.toLowerCase();' required></p>
+            <p><b>Password</b></p>
+            <p><input type="password" name="password" size="40" required></p>
+            <input type="submit" value="Sign In" id="signin">
+        </form>
+    </div>
+</body>
+
+</html>

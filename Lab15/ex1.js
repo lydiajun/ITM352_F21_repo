@@ -1,18 +1,17 @@
 var express = require('express');
 var app = express();
 
-// var userdata = require('./user_data.json');
-var fs = require('fs');
-
-var filename = './user_data.json';
-
-var cookieParser = require('cookie-parser');
+var cookieParser = require('cookie-parser'); // parser takes data out of a request and puts into a cookie object so you can use it
 const { response } = require('express');
 app.use(cookieParser());
 
+// var userdata = require('./user_data.json');
+var fs = require('fs');
+var filename = './user_data.json';
+
 app.get('/set_cookie', function (request, response) {
     // this will send a cookie to the requester
-    response.cookie('name', 'Lydia');
+    response.cookie('name', 'Lydia', {maxAge: 5*1000});
     response.send('The name cookie has been sent')
 });
 

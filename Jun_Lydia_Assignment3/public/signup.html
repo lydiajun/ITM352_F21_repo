@@ -1,0 +1,59 @@
+<!--
+This is the sign up or user registration page. If the customer does not have an account, they can register through
+this page by entering their full name, email, username, and a password, which is confirmed. 
+The registration only goes through (and redirects to invoice) if there are no errors.
+-->
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="signup_style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono|Open+Sans">
+    <script>
+    // If there are any errors in the sign up, the information will stay inside the textboxes so the customer can change it.
+    let params = (new URL(document.location)).searchParams;
+    window.onload = function () {
+      if (params.has('reg_errors')) {
+        var errors = JSON.parse(params.get('reg_errors')); // parse the errors. errors will show in red under each section
+        // Sticky textboxes.
+        for (i = 0; i < register.elements.length; i++) {
+          register[i].value = params.get(register[i].name);
+          if (typeof errors[register[i].name] != 'undefined') {
+            document.getElementById(register[i].name + '_error').innerHTML = errors[register[i].name];
+          }
+        }
+        alert('Please fix the following errors!'); // alert message to fix errors
+      }
+    }
+    </script>
+</head>
+<body>
+    <a href="store.html"><div id="hs"><h1>HEAVEN SCENT</h1></div></a>
+
+    <div class="box">
+        <h2>Create an Account</h2>
+
+        <form action="/process_register" method="POST" name="register">
+            <label for="email"><b>Email Address</b></label>
+            <div id='email_error' style="color:red;"></div>
+            <p><input type="text" name="email" id="email" size="40"></p>
+            <label for="fullname"><b>Full Name</b></label>
+            <div id='fullname_error' style="color:red;"></div>
+            <p><input type="text" name="fullname" id="fullname" size="40"></p>
+            <label for="username"><b>Username</b></label>
+            <div id='username_error' style="color:red;"></div>
+            <p><input type="text" name="username" id="username" size="40"></p>
+            <label for="password"><b>Password</b></label>
+            <div id='password_error' style="color:red;"></div>
+            <p><input type="password" name="password" id="password" size="40"></p>
+            <label for="confirmpassword"><b>Confirm Password</b></label>
+            <div id='confirmpassword_error' style="color:red;"></div>
+            <p><input type="password" name="confirmpassword" id="confirmpassword" size="40"></p>
+            <input type="submit" value="Sign Up" id="registerbtn">
+        </form>
+    </div>
+</body>
+</html>

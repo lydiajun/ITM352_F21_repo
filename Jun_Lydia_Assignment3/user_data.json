@@ -1,12 +1,1 @@
-{
-    "itm352": {
-        "name": "itm352",
-        "password": "grader",
-        "email": "itm352@hawaii.edu"
-    },
-    "lydiajun": {
-        "name": "lydiajun",
-        "password": "password",
-        "email": "lydiajun@hawaii.edu"
-    }
-}
+{"itm352":{"name":"itm352","password":"grader","email":"itm352@hawaii.edu"},"lydiajun":{"name":"lydiajun","password":"password","email":"lydiajun@hawaii.edu"},"username":{"name":"username","password":"password123","email":"test@test.com"},"testusername":{"name":"testusername","password":"password123","email":"email@email.org"}}

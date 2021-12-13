@@ -1,204 +1,327 @@
-// This is the server.js file that runs the server for my store and contains instructions for specific requests.
+/* 
+Author: Lydia Jun
+Reference: Nicholas Samson's Assignment 3
+Description: This is the Javascript file that runs the server for my store and contains instructions for specific requests.
+*/
 
 // DEFINING VARIABLES
 
-// from Lab 13, to use express modules
+// From Lab 13, to use express modules
 var express = require('express');
 var app = express();
 var myParser = require("body-parser");
 
-// requires user_data.json file for user information, taken from Lab 14
+// Requires user_data.json file for user information, taken from Lab 14
 var fs = require('fs');
 var filename = './user_data.json';
 
-// requires products.js file for product information
+// Requires products.js file for product information
 var data = require('./public/products.js');
 var products = data.products;
 
-// sets product inventory to 10
-products.forEach((prod, i) => { prod.inventory = 10; });
-var querystring = require("querystring");
+// Requires querystring when converting products quantity object into a string array during login processing
+var queryString = require('query-string');
+const qs = require('qs');
 
-// used to later store quantity data from products disiplay page. assume empty at first
-var temp_qty_data = {};
+// Loads up cookie parser
+var cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
+// Loads up session
+var session = require('express-session');
+
+// Requires nodemailer for sending the invoice to the customer's email
+var nodemailer = require('nodemailer');
+const { exit } = require('process');
 
 
 // ROUTING
 
 // Monitor all requests
-app.all('*', function (request, response, next) {
-    console.log(request.method + ' to ' + request.path); // console shows request to path
+app.all('*', function (req, res, next) {
+    console.log(req.method + ' to ' + req.path); // console shows request to path
     next();
 });
 
-// GET request for products.js.
-app.get('/products.js', function (request, response, next) {
-    response.type('.js');
-    var products_str = `var products = ${JSON.stringify(products)};`; // puts products into JSON object
-    response.send(products_str);
+// Set cookie
+app.get('/set_cookie', function (req, res, next) {
+    let my_name = 'Lydia Jun';
+    res.clearCookie('my_name');
+    res.send(`Cookie for ${my_name} sent!`);
+    next();
 });
 
-// Function adopted from previous labs.
-// Checks if a string q is a non-neg integer. If returnErrors is true, the array of errors is returned.
-// Otherwise returns true if q is non-neg int.
+// Use cookie
+app.get('/use_cookie', function (req, res, next) {
+    if (typeof req.cookies['username'] != 'undefined') { // If cookie associated with username isn't undefined,
+        res.send(`Hello ${req.cookies['username']}!`) // Send response greeting customer by username
+    } else {
+        res.send(`I don't know you!`) // Else send this response
+    }
+    next();
+});
+
+// Session settings
+app.use(session({
+    secret: "TXkgZmF2b3JpdGUgZnJhZ3JhbmNlIGlzIE9jZWFuIGJ5IEdpb3JnaW8gQXJtYW5pIQ==", // Encrypt the session for security (read https://stackoverflow.com/questions/18565512/importance-of-session-secret-key-in-express-web-framework)
+    resave: true, // Enabled so that when a session wasn't changed during a request, it is still updated in the store (thereby marking it active) (read https://stackoverflow.com/questions/40381401/when-to-use-saveuninitialized-and-resave-in-express-session)
+    saveUninitialized: false, // Useful for implementing login sessions, reducing server storage usage, or complying with laws that require permission before setting a cookie (https://github.com/expressjs/session#saveuninitialized)
+    httpOnly: false, // Protocol setting
+    secure: true, // Recommended setting for security https://expressjs.com/en/resources/middleware/session.html
+}));
+
+// Loads file service. Taken from Assignment 2
+if (fs.existsSync(filename)) {
+    var stats = fs.statSync(filename);
+    var data = fs.readFileSync(filename, 'utf-8');
+    var user_data = JSON.parse(data);
+} else {
+    console.log(filename + 'does not exist!'); // If file doesn't exist, show in console
+}
+
+// Checks for the existence of the file, from Lab 14
+if (fs.existsSync(filename)) {
+    var data = fs.statSync(filename);
+    data = fs.readFileSync(filename, 'utf-8'); // If it exists, read the file user_data.json storedin filename
+    var user_data = JSON.parse(data); // Parse user data
+} else {
+    console.log(`${user_data} does not exist!`) // If it doesn't exist, send a message to console
+    exit();
+}
+
+// Function adopted from previous labs. Checks if a string q is a non-neg integer. 
+// If returnErrors is true, the array of errors is returned. Otherwise returns true if q is non-neg int.
 function isNonNegInt(q, return_errors = false) {
-    errors = []; // Assume no errors at first.
-    if (q == '') q = 0; // Blank quantities = 0.
+    errors = []; // Assume no errors at first
+    if (q == '') q = 0; // Blank quantities = 0
     if (Number(q) != q) errors.push('<font color="red">Not a number!</font>'); // Check if string is a number value
-    if (q < 0) errors.push('<font color="red">Negative value!</font>'); // Check if it is non-negative
-    if (parseInt(q) != q) errors.push('<font color="red">Not an integer!</font>'); // Check that it is an integer
+    else if (q < 0) errors.push('<font color="red">Negative value!</font>'); // Check if it is non-negative
+    else if (parseInt(q) != q) errors.push('<font color="red">Not an integer!</font>'); // Check that it is an integer
     return return_errors ? errors : (errors.length == 0);
 }
 
 // Adopted from Lab 13 Exercise 3.
-app.use(express.urlencoded({ extended: true }));
-// Checks for the existence of the file, from Lab 14
-if (fs.existsSync(filename)) { 
-    var data = fs.readFileSync(filename, 'utf-8'); // if it exists, read the file user_data.json storedin filename
-    var user_data = JSON.parse(data); // parse user data
-  } 
+app.use(myParser.urlencoded({ extended: true }));
+app.use(myParser.json());// Use JSON parser to parse data
 
-// POST request from signin.html. Adopted from Assignment 2 code examples on ITM 352 website, and received help from Professor Port
-app.post("/process_login", function (req, res) {
-    var the_username = req.body.username.toLowerCase();
-    if (typeof user_data[the_username] != 'undefined') {
-        if (user_data[the_username].password == req.body.password) { // Check if password matches username.
-            // if there are no errors, store user info in temp_qty_data and send to invoice.  
-            temp_qty_data['username'] = the_username;
-            temp_qty_data['email'] = user_data[the_username].email;       
-            let params = new URLSearchParams(temp_qty_data);
-            res.redirect('/invoice.html?' + params.toString()); // Send to invoice page if login successful.
-            return; // end process
-        } else { // else (the_username password does not match the password entered), then there's an error
-            req.query.username = the_username;
-            req.query.LoginError = 'Invalid password!'; // Error message for wrong password.
+// Process_form from index/home page
+app.post("/process_form", function (req, res) { 
+    params = req.body; // Set the body of our form that we previously set in our home page to the params
+
+    // Quantity validation
+    if (typeof params['purchase_submit'] != 'undefined') { 
+        has_errors = false; // Assume valid quantities at start
+        total_qty = 0; // Assume no quantities at start in the total_qty variable
+        for (i = 0; i < products.length; i++) {
+            if (typeof params[`quantity${i}`] != 'undefined') { // If quantities are valid, run the following code
+                a_qty = params[`quantity${i}`]; // Puts quantities in the quantity property of params
+                total_qty += a_qty; // Adds quantities to total quantity variable
+                if (!isNonNegInt(a_qty)) {
+                    has_errors = true; // If isNonNegInt function returns true for errors, there are invalid quantities
+                }
+            }
         }
-    } else { // else (the _username is undefined), there's an error
-        req.query.LoginError  = 'Invalid username!'; // Error message for user that doesn't exist.
-    } 
-    // otherwise back to login with errors.    
-    params = new URLSearchParams(req.query);
-    res.redirect("./signin.html?" + params.toString()); // Redirect to signin.html if errors.
-});
 
-// POST request from signup.html. Received help from Professor Port
-// Registration validation (each validation adopted from https://www.w3resource.com/javascript/form/javascript-sample-registration-form-validation.php)
-app.post("/process_register", function (req, res) {
-    var reg_errors = {};  // assume no errors at start
-    var reg_username = req.body.username.toLowerCase();
-
-    // EMAIL VALIDATION
-    if (/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(req.body.email)) { //check if the fullname is correct
-    } else {
-        reg_errors['email'] = "Invalid email."; // error message for email that doesn't match format of name@website.domain
-    } 
-
-    // NAME VALIDATION
-    if (/^[A-Za-z, ]+$/.test(req.body.fullname)) { // name must contain only letters
-    } else {
-        reg_errors['fullname'] = "Enter a name with alphabet characters only."; // error message if name contains numbers or invalid characters/symbols
-    }
-    
-    if (req.body.fullname.length > 30 && req.body.fullname.length < 1) { // 30 characters or less
-        reg_errors['fullname'] = "Name must be less than 30 characters."; // error message if name exceeds 30 characters or nothing in there
-    }
-
-    // USERNAME VALIDATION
-    // alphanumeric check taken from https://stackoverflow.com/questions/4434076/best-way-to-alphanumeric-check-in-javascript
-    if (/^[0-9a-z]+$/.test(req.body.username)) { // Letters and numbers only
-    } else {
-        reg_errors['username'] = "Enter a username with alphanumeric characters only.";  // error message if username contains invalid characeters/symbols
-    }
-
-    if (req.body.username.length > 10 || req.body.username.length < 4) { // 4-10 characters
-        reg_errors['username'] = "Username must be 4-10 characters."; // error message if username is under 4 characters or over 10 characters
-    }
-    
-    if (typeof user_data[reg_username] != 'undefined') { // Username must be unique
-        reg_errors['username'] = 'This username is already taken!'; // error message if username is already in user_data.json file
-    }
-
-    // PASSWORD VALIDATION
-    if (req.body.password.length < 6) {
-        reg_errors['password'] = "Password must be more than 6 characters."; // error message if password doesn't exceed 6 characters
-    }
-
-    // CONFIRM PASSWORD VALIDATION
-    if (req.body.password !== req.body.confirmpassword) {
-        reg_errors['confirmpassword'] = "Passwords do not match." // error message if passwords don't match
-    }
-
-    // Save registration data to json file and send to invoice page if registration successful. 
-    // Taken from Lab 14 Exercise 4.
-    if (Object.keys(reg_errors).length == 0) {
-        var username = req.body['username'].toLowerCase();
-        user_data[username] = {};
-        // information entered is added to user_data
-        user_data[username]['name'] = req.body['fullname']; 
-        user_data[username]['password'] = req.body['password'];
-        user_data[username]['email'] = req.body['email'];
-
-        // stored data of purchase info goes into temp_qty_data
-        fs.writeFileSync(filename, JSON.stringify(user_data), "utf-8");
-        // username and email from temp_qty_data variable added into file as username and email
-        temp_qty_data['username'] = username;
-        temp_qty_data['email'] = user_data[username]["email"];
-        let params = new URLSearchParams(temp_qty_data);
-        res.redirect('./invoice.html?' + params.toString()); // go to invoice at the end of a successful registration process
-    }
-
-    // Otherwise back to registration with the registration errors.    
-    else {
-        req.body['reg_errors'] = JSON.stringify(reg_errors);
-        let params = new URLSearchParams(req.body);
-        res.redirect('signup.html?' + params.toString()); // redirect to signup page after errors popup
-      }
-});
-
-// Process purchase request (validate quantities, check quantity available)
-// Adopted from Lab 13 Exercise 3. (this has remained the same since Assignment 1)
-app.post("/process_form", function (request, response, next) {
-    // Post request routing.
-    let POST = request.body;
-
-    // Error alert if form submission has no quantities.
-    var errors = {};
-    errors['no_quantities'] = 'Please enter a valid quantity!';
-
-    for (i = 0; i < products.length; i++) {
-        qua = POST['quantity' + i];
-        // Error alert if invalid quantities inputted into textboxes.
-        if (isNonNegInt(qua) == false) {
-            errors['quantity' + i] = `Please enter valid quantities for ${products[i].model}`;
-        }
-        if (qua > 0) {
-            delete errors['no_quantities']; // Delete errors if valid quantities.
-            // Validate quantities by checking available amount in inventories.
-            if (qua > products[i].inventory) { // Error alert if quantity submitted is more than available in inventories.
-                errors['inventory' + i] = `${qua} of ${products[i].model} not available. Only ${products[i].inventory} available.`;
+        // Process purchase to and from shopping cart page
+        if (typeof params["purchase_submit"]) {
+            // Instructions for redirecting to invoice if no quantity errors
+            if (has_errors) { // If there are errors:
+                res.redirect(`./index.html?${qs.stringify(params)}`); // Redirect to index.html
+            } else if (total_qty == 0) { // If there are no quantities selected:
+                res.redirect(`./index.html?${qs.stringify(params)}`); // Redirect to index.html
+            } else { // But, if all good to go:
+                req.session[cartfile] = `${qs.stringify(params)}`; // Request the session from the shopping cart
+                if (typeof req.cookies["username"] != 'undefined') { // If the cookie assigned to the username is not undefined:
+                    res.redirect(`./productdisplay.html?${qs.stringify(params)}`); // Redirect to productdisplay.html page
+                } else { // If undefined user:
+                    res.redirect(`./login.html?${qs.stringify(params)}`); // Redirect to login.html page so customer can do a proper login (or registration)
+                }
             }
         }
     }
+});
 
-    // Querystring based on POST request.
-    QString = querystring.stringify(POST);
-    if (JSON.stringify(errors) === '{}') {
-        // Remove quantity for amount of products i purchased.
-        for (i = 0; i < products.length; i++) {
-            products[i].inventory -= Number(POST['quantity' + i]);
+// Add to shopping cart 
+app.post("/addtocart", function (req, res) {
+    console.log(req.body); // Shows request body in console
+    itemdata = req.body;// Sets the itemdata variable to the request body
+    // If quantities are valid, add the items to cart. If not, return the errors according to isNonNegInt function
+    if (isNonNegInt(itemdata.quantity)) {
+        if (typeof req.session.cart == "undefined") { // If there is no shopping cart in the session, make a cart
+            req.session.cart = {}; // Assume cart is empty at first. Items will be added to this object for the user's session
         }
-        // Redirect customer to signin.html if valid quantities entered.
-        temp_qty_data = request.body;
-        response.redirect("./signin.html?" + `    `);
-    } else { // Else, give the errors.
-        let errObj = { 'error': JSON.stringify(errors) };
-        QString += '&' + querystring.stringify(errObj);
-        response.redirect("./store.html?" + QString); // Redirect to store.html if errors.
+        if (typeof req.session.cart[itemdata.producttype] == "undefined") { // If the product type is undefined, create a product array for it
+            req.session.cart[itemdata.producttype] = []; // Empty array where product type will be added
+        }
+        if (typeof req.session.cart[itemdata.producttype][itemdata.productindex] == "undefined") { // If the product type doesn't exist in the cart, make space to add the product
+            req.session.cart[itemdata.producttype][itemdata.productindex] = 0; // Index of 0 where product will be added
+        }
+        req.session.cart[itemdata.producttype][itemdata.productindex] += parseInt(itemdata.quantity); // Parse quantity to an integer instead of a string!
+        res.send(`Added ${itemdata.quantity} of ${itemdata.producttype} fragrance to cart`);// Alert message that _ quantity of _ item was added to cart
+        console.log(req.session.cart); // Show request of shopping cart from session in the console
+    } else {
+        res.send(`Invalid quantity!`); // Send a response stating the quantities are invalid. Nothing added to cart
     }
 });
 
-// Route all other GET requests to files in public.
+// Load the shopping cart to server
+app.post("/loadcart", function (req, res) { // If we have not previously requested the cart data, create an object for it
+    if (typeof req.session.cart == "undefined") {
+        req.session.cart = {}; // Cart object
+    }
+    res.json(req.session.cart) // Cart data will be in JSON format
+
+});
+
+// Log out function
+app.get("/logout", function (req, res) {
+    res.clearCookie('username'); // Cleat the cookie associated with the username of the customer logged in
+    // Save the script that logs the user out into the str variable and redirect to the home page.
+    str = `<script>alert("${req.cookies['username']} is logged out"); location.href="./index.html";</script>`; 
+    res.send(str); // Send the str variable
+    req.session.destroy(); // Destroy the session containing the cart info and cookies
+});
+
+// Process login
+app.post("/process_login", function (req, res) {
+    var loginError = []; // Assume no login errors at first. Add all errors into this array
+    var ClientUsername = req.body.username.toLowerCase(); // Put the username in lowercase and check against user_data.json file 
+    if (typeof user_data[ClientUsername] != 'undefined') {// If username has a match in database, return the object
+        // Match the password next
+        if (user_data[ClientUsername].password == req.body.password) { // Check password against user password from database
+            req.query.username = ClientUsername;
+            req.query.name = user_data[req.query.username].name
+            res.cookie('username', ClientUsername); // Send cookie associated with username to session
+            res.redirect('./productdisplay.html?pkey=Chanel');// If successful login, edirect to store
+            return;
+        } else { // If username or password is wrong, display a message containing the specific errors
+            req.query.username = ClientUsername; // Sets the username to the username inputted by customer
+            req.query.name = user_data[ClientUsername].name; // Confirms the userername input is the same 
+            req.query.loginError = loginError.join(' '); // Join errors with a space
+        }
+    } else { // If the username is invalid or doesn't exist in database, push the error
+        loginError.push = ('Invalid username!'); // Error message
+        req.query.loginError = loginError.join(' '); // Join errors with a space
+    }
+    res.redirect('./login.html?' + queryString.stringify(req.query));// Redirect to login page if there are errors so customer can try again
+});
+
+// Process registration
+app.post("/process_register", function (req, res) {
+    let POST = req.body; 
+    var errors = []; // Assume no errors at first. Add registration errors in this array
+
+    // Registration validation (each validation adopted from https://www.w3resource.com/javascript/form/javascript-sample-registration-form-validation.php)
+    
+    // EMAIL VALIDATION
+    if (/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(POST['email'])) { // Check if the email is in the correct format
+    } else {
+        errors.push("Invalid email."); // Error message for email that doesn't match format of name@website.domain
+    }
+
+    // NAME VALIDATION
+    if (/^[A-Za-z, ]+$/.test(POST['fullname'])) { // Name must contain only letters
+    } else {
+        errors.push('Enter a name with alphabet characters only.'); // Error message if name contains numbers or invalid characters/symbols
+    }
+    if (POST['fullname'].length > 30 && POST['fullname'].length < 1) { // Name must be 30 characters or less
+        errors.push("Name must be less than 30 characters."); // Error message if name exceeds 30 characters or nothing in there
+    }
+
+    // USERNAME VALIDATION
+    // Alphanumeric check taken from https://stackoverflow.com/questions/4434076/best-way-to-alphanumeric-check-in-javascript
+    if (/^[0-9a-z]+$/.test(POST['username'])) { // Username must contain only letters and/or numbers
+    } else {
+        errors.push('Enter a username with alphanumeric characters only.');  // Error message if username contains invalid characeters/symbols
+    }
+    if (POST['fullname'].length > 10 || POST['fullname'].length < 4) { // Username must be 4-10 characters
+        errors.push('Username must be 4-10 characters.'); // Error message if username is under 4 characters or over 10 characters
+    }
+    var reguser = POST['username'].toLowerCase(); // Username must be unique
+    if (typeof user_data[reguser] != 'undefined') { // Check against all usernames existing in database
+        errors.push('This username is already taken.'); // ERror message if username is non-unique
+    }
+
+    // PASSWORD VALIDATION
+    if (POST['password'].length < 6) { // Password must be at least 6 characters
+        errors.push('Password must be more than 6 characters.'); // Error message if password doesn't exceed 6 characters
+    }
+
+    //CONFIRM PASSWORD VALIDATION
+    if (POST['password'] == POST['confirmpassword']) { // Password must match what is entered in Confirm Password box
+    } else {
+        errors.push('Passwords do not match.'); // Error message if passwords don't match
+    }
+
+    // Save registration data to user_data.json file and send to store if registration successful. Adopted from Lab 14, Excercise 14
+    if (errors.length == 0) {
+        var username = POST["username"];
+        user_data[username] = {};
+        // Information entered is added to user_data.json
+        user_data[username].name = POST['username']; // Post username = usernamedata_username
+        user_data[username].password = POST['password']; // Post password = userdata_password
+        user_data[username].email = POST['email']; // Post email = usernamedata_email
+        data = JSON.stringify(user_data);// Converts user data into JSON to store into user_data.json
+        fs.writeFileSync(filename, data, "utf-8");// Write data to user_data.json file
+        ClientUsername = user_data[username]['name'];
+        ClientEmail = user_data[username]['email'];
+        res.cookie("username", ClientUsername).send; // Send cookie associated with username to server
+        res.redirect('./productdisplay.html?pkey=Chanel'); // Redirect to Chanel page so customer can start shopping
+    }
+    else {
+        req.query.errors = errors.join(' '); // Join the errors in registration with a space
+        res.redirect('./register.html?' + qs.stringify(req.query));// Then redirect back to registration page so customer can fix errors
+    }
+});
+
+// Process checkout
+app.post("/checkout", function (req, res) {
+    var invoice_str = `Thank you for your order!<table>`; // Creates invoice that will be sent to email
+    var shopping_cart = req.session.cart; // Set shopping cart as the cart requested from the session
+    for (pkey in products) {
+        for (i = 0; i < products[pkey].length; i++) {
+            if (typeof shopping_cart[pkey] == 'undefined') continue;
+            qty = shopping_cart[pkey][i];
+            if (qty > 0) {
+                invoice_str += `<tr><td>${qty}</td><td>${products[pkey][i].brand}</td><tr>`;
+            }
+        }
+    }
+    invoice_str += '</table>';
+
+    // Decodes the invoice that was encoded
+    // Taken from Example 3 of Assignment 3 code examples from class website (https://dport96.github.io/ITM352/morea/180.Assignment3/reading-code-examples.html)
+    invoice_str = decodeURI(req.body.invoicestring);
+    var transporter = nodemailer.createTransport({
+        // Because we are using UH as the host, we must be using their network for the email to work
+        host: "mail.hawaii.edu",
+        port: 25,
+        secure: false,
+        tls: {
+            rejectUnauthorized: false
+        }
+    });
+    // Info of sender
+    var user_email = 'noreply@heavenscent.com';
+    var mailOptions = {
+        from: 'HEAVENSCENT',
+        to: user_email,
+        subject: 'Your Order from HEAVENSCENT!',
+        html: invoice_str
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) { // If there are errors in sending invoice (e.g., due to network issue), display error message below invoice
+            invoice_str += `<p>There was an error and your invoice was not sent!</p> <p>Return to <a href="/index.html">HEAVENSCENT</p>`;
+        } else { // Otherwise, show that the email was sent successfully
+            invoice_str += '<p>The invoice was sent to your email. Enjoy your heaven scent!</p> <p>Return to <a href="/index.html">HEAVENSCENT</p>';
+        }
+        req.session.destroy(); // Destroys session
+        res.send(invoice_str);
+    });
+});
+
+// Route all other GET requests to files in local directory
 app.use(express.static('./public'));
 
-// Start server.
+// Start server
 app.listen(8080, () => console.log(`listening on port 8080`));

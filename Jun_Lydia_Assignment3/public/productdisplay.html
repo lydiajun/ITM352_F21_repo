@@ -1,0 +1,316 @@
+<!--
+Author: Lydia Jun
+References: Example 1 of Assignment 3 code examples from class website (https://dport96.github.io/ITM352/morea/180.Assignment3/reading-code-examples.html)
+and Nicholas Samson's Assignment 3
+Description: This is the file that displays the product listings. Listings change on the page based on the brand. Product pages cannot
+be accessed without a successful login.
+-->
+
+<!DOCTYPE html>
+<html>
+<title>HEAVENSCENT</title>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono|Open+Sans">
+<style>
+  /* Nav bar */
+  .w3-bar-block .w3-bar-item {
+    padding: 20px;
+  }
+
+  /* Body styling */
+  body, h4, h5 {
+    font-family: 'roboto mono', sans;
+  }
+
+  div.a {
+    text-align: center;
+    height: 300px;
+    width: 400px;
+    position: absolute;
+    top: 85%;
+    left: 26.2%;
+    margin-top: -250px;
+    margin-left: -200px;
+    color: white
+  }
+
+  div.b {
+    text-align: center;
+    height: 200px;
+    width: 400px;
+    position: absolute;
+    top: 85%;
+    left: 50%;
+    margin-top: -250px;
+    margin-left: -200px;
+    color: white
+  }
+
+  div.c {
+    text-align: center;
+    height: 200px;
+    width: 400px;
+    position: absolute;
+    top: 85%;
+    left: 73.8%;
+    margin-top: -250px;
+    margin-left: -200px;
+    color: white
+  }
+
+  div.d {
+    text-align: center;
+    height: 200px;
+    width: 400px;
+    position: absolute;
+    top: 74%;
+    left: 50%;
+    margin-top: -250px;
+    margin-left: -200px;
+    color: black
+  }
+
+  div.e {
+    text-align: left;
+    max-width: 1000px;
+    position: absolute;
+    top: 87%;
+    left: 20%;
+    font-size: 5px;
+    color: black
+  }
+
+  /* Listing styling */
+  img {
+    width: 200px;
+    height: 200px;
+    border: 1.5px solid black;
+  }
+
+  .quantity {
+    width: 200px;
+  }
+
+  /* Add to Cart button */
+  #addtocart {
+    font-family: 'roboto mono', sans;
+    font-size: 15px;
+    color: white;
+    background-color: black;
+    border-radius: 25px;
+    padding: 5px;
+    box-shadow: 3px 3px gray;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  #addtocart:hover {
+    color: black;
+    background-color: white;
+  }
+</style>
+
+<script src="products.js"> </script>
+<script>
+  var products_array = "products.js"
+  let params = (new URL(document.location)).searchParams; // Gets form submission data inside params.
+  var producttype = params.get("pkey"); // Assigns product key to params so we will be able to reference everything in the products js to this key for easy use
+
+  // Function that deals with reloading or redirecting page.
+  // Initializes our cart and productdata so we won't have an undefined variable
+  window.onload = function () {
+    if (typeof cart_data[producttype] != "undefined") {
+      for (i in cart_data[producttype]) {
+        document.getElementById(`quantity${i}`).value = cart_data[producttype][i]; // Show quantity in cart data
+      }
+    }
+  };
+
+  // Function adopted from previous labs. Checks the quantity entered into textboxes using isNonNegInt
+  function checkQuantityTextbox(theTextbox) {
+    errs = isNonNegInt(theTextbox.value, true); // Uses isNonNegInt to find errors in quantities entered in textboxes.
+    if (errs.length == 0) errs = ['You want:']; // Onkeyup, "Quantity:" changes to "You want:"
+    if (theTextbox.value.trim() == '') errs = ['Quantity:']; // Changes back to "Quantity:" after erasing textbox.
+    document.getElementById(theTextbox.id + '_label').innerHTML = errs.join(','); // Show errors from isNonNegInt function.
+  }
+
+  // Function adopted from previous labs. Checks if a string q is a non-neg integer. 
+  // If returnErrors is true, the array of errors is returned. Otherwise returns true if q is non-neg int.
+  function isNonNegInt(q, return_errors = false) {
+    errors = []; // Assume no errors at first
+    if (q == '') q = 0; // Blank quantities = 0
+    if (Number(q) != q) errors.push('<font color="red">Not a number!</font>'); // Check if string is a number value
+    else if (q < 0) errors.push('<font color="red">Negative value!</font>'); // Check if it is non-negative
+    else if (parseInt(q) != q) errors.push('<font color="red">Not an integer!</font>'); // Check that it is an integer
+    return return_errors ? errors : (errors.length == 0);
+  }
+
+  // Function to get cookie
+  // Adopted from responses in https://stackoverflow.com/questions/10730362/get-cookie-by-name
+  function getCookie(name = '') {
+    let cookies = document.cookie; // Set cookies to the cookie of the document
+    let cookiestore = {}; // Cookiestore is an empty object at first
+    cookies = cookies.split(";"); // Split the cookies, separate by semicolon
+    if (cookies[0] == "" && cookies[0][0] == undefined) {
+      return undefined;
+    }
+
+    cookies.forEach(function (cookie) { 
+      cookie = cookie.split(/=(.+)/); // Split the cookie up
+      if (cookie[0].substr(0, 1) == ' ') { // Into substrings, separated by space
+        cookie[0] = cookie[0].substr(1);
+      }
+      cookiestore[cookie[0]] = cookie[1]; // Set the 0th cookie of cookiestore as the 1st cookie
+    });
+    return (name !== '' ? cookiestore[name] : cookiestore);
+  }
+
+  // Savetocart function. Gets cart info, assigns them to variables which are sent to  server
+  function savetocart(index) {
+    var productdata = {}; // Assume no product data at first. Add product data to this object
+    productdata.producttype = producttype; // Assign to shorter variables
+    productdata.productindex = index;
+    productdata.quantity = document.getElementById('quantity' + index).value;
+    if (typeof cart_data[producttype] == "undefined") {
+      cart_data[producttype] = []; // Add product type to empty array
+    }
+    if (typeof cart_data[producttype][index] == "undefined") { // If the product type of cart data is undefined,
+      cart_data[producttype][index] = 0; // Cart should have nothing inside
+    }
+    document.getElementById('quantity' + index).value = parseInt(document.getElementById('quantity' + index).value) + cart_data[producttype][index];
+    console.log(productdata); // Show productdata variable in console
+    fetch('addtocart', { // Fetch the addtocart function from server
+      method: 'POST', // Which uses a POST method
+      body: new URLSearchParams(
+        productdata
+      )
+    }).then(res => res.text()) // Put response as text
+      .then((res) => {
+        alert(res); // Give response
+      })
+      .catch(err => console.log(err)) // Show in console
+  }
+
+  // JSON callback function
+  function loadJSON(service, callback) { // Loads the cart data from the server and parses into JSON
+    var xobj = new XMLHttpRequest();
+    xobj.overrideMimeType("application/json"); // Set MimeType to JSON
+    xobj.open('POST', service, false);
+    xobj.onreadystatechange = function () {
+      if (xobj.readyState == 4 && xobj.status == "200") {
+        // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+        callback(xobj.responseText);
+      }
+    };
+    xobj.send(null);
+  }
+  var cart_data = {}; // Cart_data is an empty object at first
+  loadJSON('loadcart', function (res) {
+    cart_data = JSON.parse(res); // Parse cart_data into JSON format
+    // Returns the cart data
+  });
+  console.log(cart_data); // Show in console
+
+  // Variables to store our cookie data to edit
+  var cookieToEdit = getCookie('username'); // Edit cookie associated with username
+  var x = cookieToEdit.replace('username=', ''); // Replace username with blank
+  var display = x.replace('%20', ' ');
+</script>
+
+<body>
+  <form name="product_selection_form" action="process_form" method="POST">
+    <!-- SIDEBAR -->
+    <nav class="w3-sidebar w3-bar-block w3-card w3-top w3-xlarge w3-animate-left"
+      style="display:none;z-index:2;width:40%;min-width:300px" id="mySidebar">
+      <a href="javascript:void(0)" onclick="w3_close()" class="w3-bar-item w3-button">Close Menu</a>
+      <script>
+        for (let ptype in products) {
+          document.write(`<a href="./productdisplay.html?pkey=${ptype}" onclick="w3_close()" class="w3-bar-item w3-button">${ptype}</a>`)
+        }
+      </script>
+      <a href="cart.html" onclick="w3_close()" class="w3-bar-item w3-button">Shopping Cart</a>
+
+      <!-- Loop for whether or not nav bar should display Log In / Log Out -->
+      <script>
+        if (getCookie('username') == undefined) { // If the cookie is undefined,
+          document.write(`<a href="Login.html" onclick="w3_close()" class="w3-bar-item w3-button">Log In</a>`); // Show the Log In link
+        } else { // Else, show username with "Log Out (username)" function
+          document.write(`<a href="logout" onclick="w3_close()" class="w3-bar-item w3-button">Log Out ${getCookie('username')}</a>`) // Onclick, redirect customer to index and logs out customer
+        }
+      </script>
+
+      <!-- Loop for whether or not nav bar should display register -->
+      <script>
+        if (getCookie('username') == undefined) { // If cookie is undefined,
+          <a href="register.html" onclick="w3_close()" class="w3-bar-item w3-button">Register</a> // Show the Register link
+        } else { // Else, show nothing
+          <a href=" " onclick="w3_close()" class="w3-bar-item w3-button"></a> 
+        }
+      </script>
+    </nav>
+
+    <!-- TOP HANDLE -->
+    <div class="w3-top">
+      <div class="w3-white w3-xlarge" style="max-width:1200px;margin:auto">
+        <div class="w3-button w3-padding-16 w3-left" onclick="w3_open()">☰</div>
+        <div class="w3-right w3-padding-16">⋆⁺₊⋆ ☾ ⋆⁺₊⋆</div>
+        <div class="w3-center w3-padding-16">HEAVENSCENT</div>
+      </div>
+    </div>
+
+    <!-- PAGE CONTENT -->
+    <div class="w3-main w3-content w3-padding" style="max-width:1200px;margin-top:100px">
+
+      <!-- PRODUCT LISTING -->
+      <script>
+        for (i = 0; i < products[producttype].length; i++) { // Generates products with the product key reference
+          document.write(`
+            <div class = "w3-quarter">
+              <br><br>
+            <form name="Product${i}" id="product${i}" class="product_listing">   
+              <h5 id = brand${i} >${products[producttype][i].brand}</h5>
+              <p id = price${i}>$${products[producttype][i].price}</p>
+              <img src="${products[producttype][i].image}" alt=${products[producttype][i].brand} style=width="200" height="200" float:left><br>
+              <span id="quantity${i}_span"}"></span><br><br>
+              <label id="quantity${i}_label"}">Quantity:</label><br><br>
+              <input type="text" placeholder="0" class="quantity" id="quantity${i}" name="textbox${i}" onkeyup="checkQuantityTextbox(this);">
+              <p><input type="button" id="addtocart" name ="addtocart" value="Add to Cart" onclick="savetocart(${i});"></p>
+             </form>
+            </div>          
+          `);
+        }
+      </script>
+  </form>
+  </div>
+
+  <!-- Personalization on product pages -->
+  <div class="w3-container w3-padding-32 w3-center">
+    <br>
+    <span id="name_display" class="name_display">
+      <script>
+        if (getCookie('username') != undefined) { // If the cookie associated with the username is not undefined,
+          document.getElementById('name_display').innerHTML = `<h4>Welcome ${display}!</h4>`; // Show a personalized greeting
+        } else { 
+          document.getElementById('name_display').innerHTML = "Hello, please log in or register!"; // Else, tell the customer to log in or register
+        };
+      </script>
+
+  </div>
+  </div>
+
+  <script>
+    // Script to open and close sidebar
+    function w3_open() {
+      document.getElementById("mySidebar").style.display = "block";
+    }
+
+    function w3_close() {
+      document.getElementById("mySidebar").style.display = "none";
+    }
+  </script>
+
+  </form>
+</body>
+
+</html>

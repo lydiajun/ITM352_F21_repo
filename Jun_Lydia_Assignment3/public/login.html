@@ -1,0 +1,123 @@
+<!--
+Author: Lydia Jun
+Reference: Nicholas Samson's Assignment 3
+Description: This is the file that enables customers to log in OR go to the registration page if needed. Customers must log in
+before they can view products and go shopping.
+-->
+
+<!DOCTYPE html>
+<html>
+<title>LOG IN</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono|Open+Sans">
+<style>
+  /* Nav Bar */
+  .w3-bar-block .w3-bar-item {
+    padding: 20px;
+  }
+
+  /* Body styling */
+  body,
+  h3 {
+    text-align: center;
+    font-family: 'roboto mono', sans;
+  }
+
+  /* Log In button */
+  #login {
+    font-family: 'roboto mono', sans;
+    font-size: 15px;
+    color: white;
+    background-color: black;
+    border-radius: 25px;
+    padding: 5px;
+    box-shadow: 3px 3px gray;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  #login:hover {
+    color: black;
+    background-color: white;
+  }
+
+  /* Box around Log In*/
+  .box {
+    margin-top: 200px;
+    border: 1px solid black;
+    width: 450px;
+    background: white;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Create an account hover */
+  .create a:hover {
+    font-weight: bold;
+    color: black;
+  }
+</style>
+
+<script src="products.js"> </script>
+<script>
+  var products_array = "products.js"
+  // Adopted from Assignment 2
+  let params = (new URL(document.location)).searchParams;
+  window.onload = function () {
+    if (params.has('loginError')) {// Check if there are errors on loading of the page
+      alert('Invalid username or password.'); // If there are errors, give alert message
+    } if (params.has('username')) { // Sticky textboxes
+      username.value = params.get('username')
+    }
+  }
+</script>
+
+<body>
+  <!-- SIDEBAR -->
+  <nav class="w3-sidebar w3-bar-block w3-card w3-top w3-xlarge w3-animate-left"
+    style="display:none;z-index:2;width:40%;min-width:300px" id="mySidebar">
+    <a href="javascript:void(0)" onclick="w3_close()" class="w3-bar-item w3-button">Close Menu</a>
+    <a href="./index.html" onclick="w3_close()" class="w3-bar-item w3-button">Home</a>
+    <a href="./login.html" onclick="w3_close()" class="w3-bar-item w3-button">Log In</a>
+    <a href="./register.html" onclick="w3_close()" class="w3-bar-item w3-button">Register</a>
+  </nav>
+
+  <!-- TOP HANDLE -->
+  <div class="w3-top">
+    <div class="w3-white w3-xlarge" style="max-width:1200px;margin:auto">
+      <div class="w3-button w3-padding-16 w3-left" onclick="w3_open()">☰</div>
+      <div class="w3-right w3-padding-16">⋆⁺₊⋆ ☾ ⋆⁺₊⋆</div>
+      <div class="w3-center w3-padding-16">HEAVENSCENT</div>
+    </div>
+  </div>
+
+  <!-- LOG IN BOX -->
+  <div class="box">
+    <h3>Log In</h3>
+    New to HEAVENSCENT? <div class="create"><a href="register.html"><u>Create an account.</u></a></div>
+
+    <form name="login" action="process_login" method="POST">
+      <p><b>Username</b></p>
+      <input type="text" name="username" id="username" size="40" required><br>
+      <p><b>Password</b></p>
+      <input type="password" name="password" size="40" onkeyup="" required>
+      <p><input type="submit" id="login" value="LOG IN" name="login"></p>
+  </div>
+  </form>
+
+  <script>
+    login.action += document.location.search; // Saves querystring from the products page to keep the user information
+    // Script to open and close sidebar
+    function w3_open() {
+      document.getElementById("mySidebar").style.display = "block";
+    }
+
+    function w3_close() {
+      document.getElementById("mySidebar").style.display = "none";
+    }
+  </script>
+</body>
+
+</html>

@@ -276,7 +276,7 @@ app.post("/process_register", function (req, res) {
 
 // Process checkout. Modified from Assignment 3 Code Examples (https://dport96.github.io/ITM352/morea/180.Assignment3/reading-code-examples.html)
 app.post("/checkout", function (req, res) {
-    /* var invoice_str = `Thank you for your order!<table>`; // Creates invoice that will be sent to email
+    var invoice_str = `Thank you for your order!<table>`; // Creates invoice that will be sent to email
     var shopping_cart = req.session.cart; // Set shopping cart as the cart requested from the session
     for (pkey in products) {
         for (i = 0; i < products[pkey].length; i++) {
@@ -288,7 +288,6 @@ app.post("/checkout", function (req, res) {
         }
     }
     invoice_str += '</table>';
-    */
 
     // Decodes the invoice that was encoded
     invoice_str = decodeURI(req.body.invoicestring);
@@ -310,7 +309,7 @@ app.post("/checkout", function (req, res) {
         subject: 'Your Order from HEAVENSCENT!',
         html: invoice_str
     };
-    
+
     transporter.sendMail(mailOptions, function (error, info) {
         if (error) { // If there are errors in sending invoice (e.g., due to network issue), display error message below invoice
             invoice_str += `<p>There was an error and your invoice was not sent!</p> <p>Return to <a href="/index.html">HEAVENSCENT</p>`;

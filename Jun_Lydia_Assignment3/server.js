@@ -1,6 +1,6 @@
 /* 
 Author: Lydia Jun
-References: Assignment 3 Code Examples (https://dport96.github.io/ITM352/morea/180.Assignment3/reading-code-examples.html), Lab 15, & Nicholas Samson
+References: Assignment 3 Code Examples (https://dport96.github.io/ITM352/morea/180.Assignment3/reading-code-examples.html), Lab 15, & Nicholas Samson's code
 Description: This is the Javascript file that runs the server for my store and contains instructions for specific requests.
 */
 

@@ -1,8 +1,7 @@
 <!--
 Author: Lydia Jun
 References: Example 1 of Assignment 3 Code Examples from class website (https://dport96.github.io/ITM352/morea/180.Assignment3/reading-code-examples.html), Lab 15, & Nicholas Samson
-Description: This is the file that displays the product listings. Listings change on the page based on the brand. Product pages cannot
-be accessed without a successful login.
+Description: This is the file that displays the product listings. Listings change on the page based on the brand. 
 -->
 
 <!DOCTYPE html>
@@ -213,7 +212,7 @@ be accessed without a successful login.
               <h5 id = brand${i} >${products[producttype][i].brand}</h5>
               <p id = price${i}>$${products[producttype][i].price}</p>
               <img src="${products[producttype][i].image}" alt=${products[producttype][i].brand} style=width="200" height="200" float:left><br>
-              <span id="quantity${i}_span"}"></span><br><br>
+              <span id="quantity${i}_span"}"></span><br>
               <label id="quantity${i}_label"}">Quantity:</label><br><br>
               <input type="text" placeholder="0" class="quantity" id="quantity${i}" name="textbox${i}" onkeyup="checkQuantityTextbox(this);">
               <p><input type="button" id="addtocart" name ="addtocart" value="Add to Cart" onclick="savetocart(${i});"></p>
